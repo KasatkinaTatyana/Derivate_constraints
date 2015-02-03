@@ -2,8 +2,6 @@ clear all
 close all
 clc
 
-
-global constr1 constr2
 % 1) y' < constr
 % 2) y' > constr
 % 3) constr1 < y' < constr2
@@ -52,9 +50,6 @@ dPsi = c1 + 2*c2*(y - Y_0(1)) + 3*c3*(y - Y_0(1)).^2;
 
 plot(y,Psi);
 
-constr = 0;
-constr1 = 0.2;
-constr2 = 0.7;
 
 d_min = -100;
 d_max = 100;
@@ -114,11 +109,11 @@ cond = false;
     
     y_loc = y_left(1):dy:y_right(1);
     d = -0.1;
-    tau = (y_loc - y_left(1)) / (y_right(1) - y_left(1));
+    tau = (y_loc - y_left(1)) / (y_right(1) - y_left(1));     % tau = \tilde{y}
     Psi_1 = c0 + c1*(y_loc - Y_0(1)) + c2*(y_loc - Y_0(1)).^2 + c3*(y_loc - Y_0(1)).^3 + d*tau.^2.*(3 - 2*tau);
     dPsi_1 = c1 + 2*c2*(y_loc - Y_0(1)) + 3*c3*(y_loc - Y_0(1)).^2 + d*(6*tau - 6*tau.^2);
     
-    plot(y_loc,Psi_1,'g');
+    plot(y_loc,Psi_1,'g','LineWidth',2);
     
     Y_2_end = [y_right(1) Psi_1(end) dPsi_1(end)*Psi_1(end)];
     
@@ -129,38 +124,11 @@ cond = false;
     
     y_2 = y_right(1):dy:Y_end(1);
     plot(y_2, Psi_2, 'm');
-    
-%     for d=(d_min*0.5) : (hd*0.5) : (d_max*0.5)
-%         cond = IsCurveExist_up_dy_constr(y_left, y_right, dy, d);
-%         if (cond == true)
-%             break;
-%         end
-%     end
-%     
-%     if not(cond)
-%         N_shift = N_shift + 50;
-%     end
-%     
-%     if (abs(y_right(1) - Y_end(1))<1e-6)&&(abs(y_left(1) - Y_0(1))<1e-6)
-%         break;
-%     end
-% end
-
-
-% if (cond)
-%     % Находим интервал по d, на котором ограничение не нарушается
-%     d_lims = d_interval_up_dy_constr(y_left, y_right, dy, d);
-%     % Строим корректирующий отрезок при максимальном d
-%     replace_part = curve_synthesis(y_left, y_right, dy, d_lims(2));
-%     Psi_2 = replace_part(1,:);
-%     dPsi_2 = replace_part(2,:);
-%     x_2 = y_left(1):dy:y_right(1);
-%     plot(x_2,Psi_2,'r');
-% else
-%     disp('Алгоритм завершил свою работу');
-% end
+   
 
 %%
+
+
 
 figure(2);
 hold on; grid on;
@@ -172,4 +140,17 @@ plot(y_2, dPsi_2, 'm');
 xlabel('y');
 ylabel('dy / d\tau');
 
+%%
 
+global constr2
+constr2 = 0.6;
+
+plot_data = upper_constraint_Psi(Y_2_end, Y_end, dy);
+y_3 = plot_data(1,:);
+Psi_3 = plot_data(2,:);
+dPsi_3 = plot_data(3,:);
+
+set(0,'CurrentFigure',1);
+plot(y_3, Psi_3, 'r','LineWidth',2);
+set(0,'CurrentFigure',2);
+plot(y_3, dPsi_3, 'r');
