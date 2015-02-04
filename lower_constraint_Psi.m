@@ -1,8 +1,8 @@
-function F = upper_constraint_Psi(Y_0, Y_end, dy)
+function F = lower_constraint_Psi(Y_0, Y_end, dy)
 % Функция генерирует кривую, отрезок, на котором она строится, и ее
 % производную таким образом, чтобы выполнялось ограничение Psi(y) / dy <
 % constr2
-global constr2
+global constr1
 
 delta = Y_end(1) - Y_0(1);
 
@@ -38,9 +38,9 @@ while not(cond)
     % Ищем границы интервала, на котором нарушается ограничение
     for i=1:N
         % ------- 1) y' < constr ------------------------------------------
-        if ((flag == 0)&&(Psi(i) >= constr2))
+        % if ((flag == 0)&&(Psi(i) >= constr2))
         % ------- 2) y' > constr ------------------------------------------
-        % if ((flag == 0)&&(Psi(i) <= constr1))
+        if ((flag == 0)&&(Psi(i) <= constr1))
         % -----------------------------------------------------------------
             y_left(1) = Y_0(1) + (i-1 - N_shift)*dy;  % отступили N_shift шагов назад от критической точки
             y_left(2) = Psi(i - N_shift);
@@ -48,9 +48,9 @@ while not(cond)
             flag = 1;
         end
         % -------1)  y' < constr ------------------------------------------
-        if ((flag==1)&&(Psi(i) < constr2))
+        % if ((flag==1)&&(Psi(i) < constr2))
         % -------2) y' > constr -------------------------------------------
-        % if ((flag==1)&&(Psi(i) > constr1))
+        if ((flag==1)&&(Psi(i) > constr1))
         % -----------------------------------------------------------------
             y_right(1) = Y_0(1) + (i-1 + N_shift)*dy;
             y_right(2) = Psi(i + N_shift);
@@ -60,7 +60,7 @@ while not(cond)
     end
     
     for d=d_min:hd:d_max
-        cond = IsCurveExist_up_constr(y_left, y_right, dy, d);
+        cond = IsCurveExist_down_constr(y_left, y_right, dy, d);
         if (cond == true)
             break;
         end
@@ -74,9 +74,9 @@ end
 
 if (cond)
     % Находим интервал по d, на котором ограничение не нарушается
-    d_lims = d_interval_up_constr(y_left, y_right, dy, d);
+    d_lims = d_interval_down_constr(y_left, y_right, dy, d);
     % Строим корректирующий отрезок при максимальном d
-    replace_part = curve_synthesis(y_left, y_right, dy, d_lims(2));
+    replace_part = curve_synthesis(y_left, y_right, dy, d_lims(1));
     Psi_2 = replace_part(1,:);
     dPsi_2 = replace_part(2,:);
     x_2 = y_left(1):dy:y_right(1);
